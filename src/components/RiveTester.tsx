@@ -32,7 +32,6 @@ const RiveTester = () => {
   const [sliderNumber, setSliderNumber] = useState(0);
 
   // Drag and drop state
-  const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -43,6 +42,9 @@ const RiveTester = () => {
   const isHoveringPreviewRef = useRef(isHoveringPreview);
   useEffect(() => { isHoveringPreviewRef.current = isHoveringPreview; }, [isHoveringPreview]);
   const originalOverflowRef = useRef<string | null>(null);
+
+  // Restore isDragging state
+  const [isDragging, setIsDragging] = useState(false);
 
   // Scrolling state
   // Remove isHoveringRiveAsset state
@@ -84,9 +86,9 @@ const RiveTester = () => {
     }
   };
 
-  // Drag and drop handlers
+  // Restore drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0) { // Left mouse button only
+    if (e.button === 0) {
       setIsDragging(true);
       setDragStart({
         x: e.clientX - position.x,
@@ -99,10 +101,38 @@ const RiveTester = () => {
     if (isDragging) {
       const newY = e.clientY - dragStart.y;
       setPosition({
-        x: 0, // Lock X to 0
-        y: Math.max(0, newY) // Only allow positive Y (downward movement)
+        x: 0,
+        y: Math.max(0, newY)
       });
     }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({
+        x: touch.clientX - position.x,
+        y: touch.clientY - position.y
+      });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDragging && e.touches.length === 1) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const newY = touch.clientY - dragStart.y;
+      setPosition({
+        x: 0,
+        y: Math.max(0, newY)
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    dropRiveAsset();
   };
 
   // Auto-return animation function
@@ -158,76 +188,26 @@ const RiveTester = () => {
     }
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    // Capture the last drop location before animation starts
+  const dropRiveAsset = () => {
     const dropY = position.y;
     setLastDropLocation({ x: 0, y: dropY });
-    
-    // Check current MouseRelease state and apply appropriate logic
+    console.log('Dropping asset at Y:', dropY, 'MouseRelease:', inputValues.MouseRelease);
     const currentMouseRelease = inputValues.MouseRelease;
-    
     if (currentMouseRelease) {
-      // If MouseRelease is true, any drop sets it to false
       triggerMouseRelease();
     } else {
-      // If MouseRelease is false, only drops >= 100px set it to true
       if (dropY >= 100) {
         triggerMouseRelease();
       }
     }
-    
-    // Start auto-return animation
     animateToCenter();
+  };
+
+  const handleMouseUp = () => {
+    dropRiveAsset();
   };
 
   // Touch handlers for mobile support
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      const touch = e.touches[0];
-      setIsDragging(true);
-      setDragStart({
-        x: touch.clientX - position.x,
-        y: touch.clientY - position.y
-      });
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (isDragging && e.touches.length === 1) {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const newY = touch.clientY - dragStart.y;
-      setPosition({
-        x: 0, // Lock X to 0
-        y: Math.max(0, newY) // Only allow positive Y (downward movement)
-      });
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    // Capture the last drop location before animation starts
-    const dropY = position.y;
-    setLastDropLocation({ x: 0, y: dropY });
-    
-    // Check current MouseRelease state and apply appropriate logic
-    const currentMouseRelease = inputValues.MouseRelease;
-    
-    if (currentMouseRelease) {
-      // If MouseRelease is true, any drop sets it to false
-      triggerMouseRelease();
-    } else {
-      // If MouseRelease is false, only drops >= 100px set it to true
-      if (dropY >= 100) {
-        triggerMouseRelease();
-      }
-    }
-    
-    // Start auto-return animation
-    animateToCenter();
-  };
-
   const handleWheel = (e: React.WheelEvent) => {
     if (isHoveringPreviewRef.current) {
       e.preventDefault();
@@ -623,6 +603,12 @@ const RiveTester = () => {
     }
   }, [sliderNumber, rive]);
 
+  useEffect(() => {
+    if (!isHoveringPreview && isDragging) {
+      dropRiveAsset();
+    }
+  }, [isHoveringPreview, isDragging]);
+
   return (
     <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6">
       <Card>
@@ -652,7 +638,7 @@ const RiveTester = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="px-2 sm:px-4">
               {/* Rive Canvas with Drag and Drop */}
               <div className="relative w-full max-w-full aspect-square bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800">
                 {/* Canvas Container */}
@@ -662,12 +648,13 @@ const RiveTester = () => {
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
-                  onMouseLeave={handlePreviewMouseLeave}
+                  onMouseLeave={e => { handlePreviewMouseLeave(); setIsDragging(false); }}
                   onMouseEnter={handlePreviewMouseEnter}
                   onWheel={handleWheel} // Now triggers zoom only when mouse is over this area
                   onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
+                  onTouchCancel={() => { handlePreviewMouseLeave(); setIsDragging(false); }}
                   onDoubleClick={handleDoubleClick}
                   style={{
                     touchAction: 'none', // Prevent scrolling on touch devices for drag
@@ -686,12 +673,19 @@ const RiveTester = () => {
                     <RiveComponent className="w-full h-full" />
                   </div>
                   {/* Debug: Show hover state */}
-                  <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
+                  <div className="absolute top-2 right-2 sm:right-4 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
                     Hovering preview: <span className={isHoveringPreview ? 'text-green-400' : 'text-red-400'}>{isHoveringPreview ? 'true' : 'false'}</span>
                   </div>
                   {/* Debug: Show page scroll state */}
-                  <div className="absolute top-8 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
+                  <div className="absolute top-8 right-2 sm:right-4 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
                     Page scrolling: <span className={isPageScrolling ? 'text-green-400' : 'text-red-400'}>{isPageScrolling ? 'true' : 'false'}</span>
+                    {isPageScrolling && isHoveringPreview && (
+                      <div className="text-yellow-400 font-bold">Warning: Both true!</div>
+                    )}
+                  </div>
+                  {/* Debug: Show drag state */}
+                  <div className="absolute top-14 right-2 sm:right-4 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
+                    Dragging: <span className={isDragging ? 'text-green-400' : 'text-red-400'}>{isDragging ? 'true' : 'false'}</span>
                   </div>
                 </div>
 
