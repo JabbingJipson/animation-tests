@@ -30,7 +30,7 @@ const projects = [
 
 const Index = () => {
   const [activeProject, setActiveProject] = useState(projects[0].id);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Start with sidebar hidden
   
   const currentProject = projects.find(p => p.id === activeProject) || projects[0];
 
