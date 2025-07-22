@@ -654,7 +654,7 @@ const RiveTester = () => {
           <CardContent>
             <div className="space-y-4">
               {/* Rive Canvas with Drag and Drop */}
-              <div className="relative w-full h-64 sm:h-96 md:h-[32rem] bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800">
+              <div className="relative w-full max-w-full h-40 sm:h-64 md:h-96 lg:h-[32rem] bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800">
                 {/* Canvas Container */}
                 <div
                   ref={canvasRef}
@@ -1040,7 +1040,7 @@ const RiveTester = () => {
               )}
 
               {/* Debug Info */}
-              <div className="text-sm text-gray-500 space-y-1 p-3 bg-gray-50 rounded-lg">
+              <div className="text-sm text-gray-500 space-y-1 p-3 bg-gray-50 rounded-lg overflow-x-auto">
                 <div>Animations: {animations.length}</div>
                 <div>State Machines: {stateMachines.length}</div>
                 <div>Inputs: {stateMachineInputs.length}</div>
