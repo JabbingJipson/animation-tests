@@ -39,6 +39,27 @@ const RiveTester = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [lastDropLocation, setLastDropLocation] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [isHoveringPreview, setIsHoveringPreview] = useState(false);
+  const isHoveringPreviewRef = useRef(isHoveringPreview);
+  useEffect(() => { isHoveringPreviewRef.current = isHoveringPreview; }, [isHoveringPreview]);
+  const originalOverflowRef = useRef<string | null>(null);
+
+  // Scrolling state
+  // Remove isHoveringRiveAsset state
+  const [isPageScrolling, setIsPageScrolling] = useState(false);
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    const onScroll = () => {
+      setIsPageScrolling(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setIsPageScrolling(false), 300);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      clearTimeout(timeout);
+    };
+  }, []);
 
   // Create object URL when file is selected
   const handleFileSelect = (file: File | null) => {
@@ -208,12 +229,16 @@ const RiveTester = () => {
   };
 
   const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomFactor = 0.1;
-    const newZoom = e.deltaY > 0 
-      ? Math.max(0.6, zoom - zoomFactor) // Minimum 60%
-      : Math.min(1.4, zoom + zoomFactor); // Maximum 140%
-    setZoom(newZoom);
+    if (isHoveringPreviewRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zoomFactor = 0.1;
+      const newZoom = e.deltaY > 0 
+        ? Math.max(0.6, zoom - zoomFactor) // Minimum 60%
+        : Math.min(1.4, zoom + zoomFactor); // Maximum 140%
+      setZoom(newZoom);
+    }
+    // If not hovering, allow normal scroll (do nothing)
   };
 
   const resetView = () => {
@@ -232,6 +257,22 @@ const RiveTester = () => {
 
   const handleDoubleClick = () => {
     resetView();
+  };
+
+  const handlePreviewMouseEnter = () => {
+    setIsHoveringPreview(true);
+    if (originalOverflowRef.current === null) {
+      originalOverflowRef.current = document.body.style.overflow;
+    }
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handlePreviewMouseLeave = () => {
+    setIsHoveringPreview(false);
+    if (originalOverflowRef.current !== null) {
+      document.body.style.overflow = originalOverflowRef.current;
+      originalOverflowRef.current = null;
+    }
   };
 
   const { RiveComponent, rive } = useRive({
@@ -621,13 +662,15 @@ const RiveTester = () => {
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
-                  onMouseLeave={handleMouseUp}
-                  onWheel={handleWheel}
+                  onMouseLeave={handlePreviewMouseLeave}
+                  onMouseEnter={handlePreviewMouseEnter}
+                  onWheel={handleWheel} // Now triggers zoom only when mouse is over this area
                   onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
                   onDoubleClick={handleDoubleClick}
                   style={{
+                    touchAction: 'none', // Prevent scrolling on touch devices for drag
                     cursor: isDragging ? 'grabbing' : 'grab'
                   }}
                 >
@@ -641,6 +684,14 @@ const RiveTester = () => {
                     }}
                   >
                     <RiveComponent className="w-full h-full" />
+                  </div>
+                  {/* Debug: Show hover state */}
+                  <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
+                    Hovering preview: <span className={isHoveringPreview ? 'text-green-400' : 'text-red-400'}>{isHoveringPreview ? 'true' : 'false'}</span>
+                  </div>
+                  {/* Debug: Show page scroll state */}
+                  <div className="absolute top-8 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
+                    Page scrolling: <span className={isPageScrolling ? 'text-green-400' : 'text-red-400'}>{isPageScrolling ? 'true' : 'false'}</span>
                   </div>
                 </div>
 
