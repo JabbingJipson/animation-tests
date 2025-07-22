@@ -2,6 +2,8 @@ import { useState } from "react";
 import BackgroundVectors from "@/components/BackgroundVectors";
 import NavigationSidebar from "@/components/NavigationSidebar";
 import RiveTester from "@/components/RiveTester";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 const projects = [
   {
@@ -28,6 +30,7 @@ const projects = [
 
 const Index = () => {
   const [activeProject, setActiveProject] = useState(projects[0].id);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const currentProject = projects.find(p => p.id === activeProject) || projects[0];
 
@@ -52,13 +55,25 @@ const Index = () => {
       <BackgroundVectors />
       
       <div className="relative z-10 flex">
-        <NavigationSidebar 
-          projects={projects}
-          activeProject={activeProject}
-          onProjectSelect={setActiveProject}
-        />
+        {sidebarOpen && (
+          <NavigationSidebar 
+            projects={projects}
+            activeProject={activeProject}
+            onProjectSelect={setActiveProject}
+          />
+        )}
         
-        <div className="ml-80 flex-1 p-6">
+        <div className={sidebarOpen ? "ml-80 flex-1 p-6" : "flex-1 p-6"}>
+          {/* Toggle Sidebar Button */}
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="absolute top-4 left-4 z-20"
+            onClick={() => setSidebarOpen((open) => !open)}
+            aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
           {renderProjectContent()}
         </div>
       </div>
