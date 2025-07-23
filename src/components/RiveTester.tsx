@@ -126,7 +126,7 @@ const RiveTester = () => {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0) {
+    if (e.button === 0 && isHoveredValue) { // Only allow drag if isHovered is true
       setIsDragging(true);
       setDragStart({
         x: e.clientX - position.x,
@@ -155,7 +155,7 @@ const RiveTester = () => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
+    if (e.touches.length === 1 && isHoveredValue) { // Only allow drag if isHovered is true
       const touch = e.touches[0];
       setIsDragging(true);
       setDragStart({
@@ -683,6 +683,21 @@ const RiveTester = () => {
     }
   }, [isDragging]);
 
+  // Track isHovered input for debug UI
+  const [isHoveredValue, setIsHoveredValue] = useState(false);
+
+  useEffect(() => {
+    if (rive && selectedStateMachine) {
+      const updateIsHovered = () => {
+        const inputs = rive.stateMachineInputs(selectedStateMachine);
+        const hoverInput = inputs.find(i => i.name === 'isHovered');
+        if (hoverInput) setIsHoveredValue(!!hoverInput.value);
+      };
+      const interval = setInterval(updateIsHovered, 50);
+      return () => clearInterval(interval);
+    }
+  }, [rive, selectedStateMachine]);
+
   return (
     <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6">
       <Card>
@@ -704,137 +719,43 @@ const RiveTester = () => {
       </Card>
 
       {fileUrl && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Preview</CardTitle>
-            <CardDescription>
-              {selectedFile?.name}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="px-2 sm:px-4">
-              {/* Rive Canvas with Drag and Drop */}
-              <div className="relative w-full max-w-full aspect-square bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800">
-                {/* Canvas Container */}
-                <div
-                  ref={canvasRef}
-                  className="w-full h-full relative cursor-grab active:cursor-grabbing"
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onMouseLeave={e => { handlePreviewMouseLeave(); setIsDragging(false); }}
-                  onMouseEnter={handlePreviewMouseEnter}
-                  onWheel={handleWheel} // Now triggers zoom only when mouse is over this area
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                  onTouchCancel={() => { handlePreviewMouseLeave(); setIsDragging(false); }}
-                  onDoubleClick={handleDoubleClick}
-                  style={{
-                    touchAction: 'none', // Prevent scrolling on touch devices for drag
-                    cursor: isDragging ? 'grabbing' : 'grab'
-                  }}
-                >
-                  {/* Rive Component with Transform */}
-                  <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{
-                      transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-                      transformOrigin: 'center center',
-                      transition: isDragging ? 'none' : isAnimating ? 'none' : 'transform 0.1s ease-out'
-                    }}
-                  >
-                    <RiveComponent className="w-full h-full" />
-                  </div>
-                </div>
-
-                {/* Drag and Drop Controls */}
-                <div className="absolute top-4 right-4 flex gap-2">
-                  <Button
-                    onClick={resetView}
-                    variant="outline"
-                    size="sm"
-                    className="bg-black/50 text-white border-white/20 hover:bg-black/70"
-                  >
-                    <RotateCw className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={zoomIn}
-                    variant="outline"
-                    size="sm"
-                    disabled={zoom >= 1.4}
-                    className={`bg-black/50 text-white border-white/20 hover:bg-black/70 ${
-                      zoom >= 1.4 ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    <ZoomIn className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={zoomOut}
-                    variant="outline"
-                    size="sm"
-                    disabled={zoom <= 0.6}
-                    className={`bg-black/50 text-white border-white/20 hover:bg-black/70 ${
-                      zoom <= 0.6 ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    <ZoomOut className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Drag Instructions */}
-                <div className="absolute bottom-4 left-4 bg-black/50 text-white text-xs px-3 py-2 rounded-lg border border-white/20">
-                  <div className="flex items-center gap-2">
-                    <Move className="w-4 h-4" />
-                    <span>Drag down • Scroll to zoom • Double-click to reset</span>
-                  </div>
-                </div>
-
-                {/* Zoom Level Indicator */}
-                <div className="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-3 py-2 rounded-lg border border-white/20">
-                  <div className="font-mono">
-                    <div>{Math.round(zoom * 100)}%</div>
-                    {zoom <= 0.6 && (
-                      <div className="text-red-400 text-xs">Min: 60%</div>
-                    )}
-                    {zoom >= 1.4 && (
-                      <div className="text-red-400 text-xs">Max: 140%</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Position Coordinates Display */}
-                <div className="absolute top-4 left-4 bg-black/50 text-white text-xs px-3 py-2 rounded-lg border border-white/20">
-                  <div className="font-mono">
-                    <div>Down: {Math.round(position.y)}px</div>
-                    {inputValues.MouseRelease ? (
-                      <div className="text-red-400 text-xs mt-1">✓ Any drop → False</div>
-                    ) : (
-                      position.y >= 100 && (
-                        <div className="text-green-400 text-xs mt-1">✓ Drop ≥ 100px → True</div>
-                      )
-                    )}
-                  </div>
-                </div>
-
-                {/* Last Drop Location Display */}
-                <div className="absolute top-4 right-4 bg-black/50 text-white text-xs px-3 py-2 rounded-lg border border-white/20">
-                  <div className="font-mono">
-                    <div className="text-yellow-300">Last Drop:</div>
-                    <div>Down: {Math.round(lastDropLocation.y)}px</div>
-                    {inputValues.MouseRelease ? (
-                      <div className="text-red-400 text-xs mt-1">✓ MouseRelease: True</div>
-                    ) : (
-                      lastDropLocation.y >= 100 && (
-                        <div className="text-green-400 text-xs mt-1">✓ MouseRelease: False</div>
-                      )
-                    )}
-                  </div>
-                </div>
+        <div className="w-full max-w-full aspect-square bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800 mx-auto">
+          {/* Container for Rive preview and debug overlays */}
+          <div className="relative w-full h-full">
+            {/* Canvas Container */}
+            <div
+              ref={canvasRef}
+              className="w-full h-full relative cursor-grab active:cursor-grabbing"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={e => { handlePreviewMouseLeave(); setIsDragging(false); }}
+              onMouseEnter={handlePreviewMouseEnter}
+              onWheel={handleWheel}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={() => { handlePreviewMouseLeave(); setIsDragging(false); }}
+              onDoubleClick={handleDoubleClick}
+              style={{
+                touchAction: 'none',
+                cursor: isDragging ? 'grabbing' : 'grab'
+              }}
+            >
+              {/* Rive Component with Transform */}
+              <div
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                  transformOrigin: 'center center',
+                  transition: isDragging ? 'none' : isAnimating ? 'none' : 'transform 0.1s ease-out'
+                }}
+              >
+                <RiveComponent className="w-full h-full" />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Simple slider UI for 'slider number' */}
