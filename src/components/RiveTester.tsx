@@ -30,6 +30,7 @@ const RiveTester = () => {
   const [inputValues, setInputValues] = useState<Record<string, any>>({});
   const [testToggleValue, setTestToggleValue] = useState(false);
   const [sliderNumber, setSliderNumber] = useState(0);
+  const [lastTouchStart, setLastTouchStart] = useState<string | null>(null);
 
   // Drag and drop state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -165,6 +166,8 @@ const RiveTester = () => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    setLastTouchStart(`Preview touch at ${new Date().toLocaleTimeString()}`);
+    console.log('Touch start detected');
     if (e.touches.length === 1) { // On touch devices, allow drag regardless of isHovered
       const touch = e.touches[0];
       setIsDragging(true);
@@ -682,6 +685,91 @@ const RiveTester = () => {
     }
   }, [rive, selectedStateMachine]);
 
+  // Global touchstart debug
+  useEffect(() => {
+    const globalTouch = () => setLastTouchStart(`Global touch at ${new Date().toLocaleTimeString()}`);
+    window.addEventListener('touchstart', globalTouch);
+    return () => window.removeEventListener('touchstart', globalTouch);
+  }, []);
+
+  // Attach touchstart directly to the Rive canvas for mobile drag support
+  useEffect(() => {
+    if (canvasRef.current) {
+      const node = canvasRef.current.querySelector('canvas');
+      if (node) {
+        const handler = (e: TouchEvent) => {
+          setLastTouchStart(`Canvas touch at ${new Date().toLocaleTimeString()}`);
+          if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            setIsDragging(true);
+            setDragStart({
+              x: touch.clientX - position.x,
+              y: touch.clientY - position.y
+            });
+            setIsPointerDown(true);
+          }
+        };
+        node.addEventListener('touchstart', handler);
+        return () => node.removeEventListener('touchstart', handler);
+      }
+    }
+  }, [canvasRef, position.x, position.y]);
+
+  // Attach touchmove directly to the Rive canvas for mobile drag support
+  useEffect(() => {
+    if (canvasRef.current) {
+      const node = canvasRef.current.querySelector('canvas');
+      if (node) {
+        const handleMove = (e: TouchEvent) => {
+          if (isDragging && e.touches.length === 1) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const newY = touch.clientY - dragStart.y;
+            setPosition({
+              x: 0,
+              y: Math.max(0, newY)
+            });
+          }
+        };
+        node.addEventListener('touchmove', handleMove, { passive: false });
+        return () => node.removeEventListener('touchmove', handleMove);
+      }
+    }
+  }, [canvasRef, isDragging, dragStart.y]);
+
+  // Attach touchend directly to the Rive canvas for mobile drop support
+  useEffect(() => {
+    if (canvasRef.current) {
+      const node = canvasRef.current.querySelector('canvas');
+      if (node) {
+        const handleEnd = (e: TouchEvent) => {
+          setIsDragging(false);
+          // Track last drop position on touch end
+          const dropY = position.y;
+          setLastDropLocation({ x: 0, y: dropY });
+          animateToCenter();
+          setIsPointerDown(false);
+          // MouseRelease logic:
+          if (rive && selectedStateMachine) {
+            const inputs = rive.stateMachineInputs(selectedStateMachine);
+            const mouseReleaseInput = inputs.find(i => i.name === "MouseRelease");
+            if (mouseReleaseInput) {
+              if (!mouseReleaseInput.value && dropY >= 100) {
+                mouseReleaseInput.value = true;
+                setInputValues(prev => ({ ...prev, MouseRelease: true }));
+              } else if (mouseReleaseInput.value) {
+                mouseReleaseInput.value = false;
+                setInputValues(prev => ({ ...prev, MouseRelease: false }));
+              }
+            }
+          }
+        };
+        node.addEventListener('touchend', handleEnd);
+        return () => node.removeEventListener('touchend', handleEnd);
+      }
+    }
+  }, [canvasRef, position.y, rive, selectedStateMachine]);
+
   // State for scaling the arrow.riv
   const [arrowScale, setArrowScale] = useState(5);
   const arrowMinScale = 5;
@@ -762,6 +850,15 @@ const RiveTester = () => {
               >
                 <RiveComponent className="w-full h-full" />
               </div>
+              {/* Debug panel for isDragging and isHoveringPreview */}
+              <div
+                className="absolute bottom-4 left-4 bg-black/70 text-white text-xs px-3 py-2 rounded z-50"
+                style={{ pointerEvents: 'none' }}
+              >
+                <div>isDragging: <span className={isDragging ? 'text-green-400' : 'text-red-400'}>{isDragging ? 'true' : 'false'}</span></div>
+                <div>isHoveringPreview: <span className={isHoveringPreview ? 'text-green-400' : 'text-red-400'}>{isHoveringPreview ? 'true' : 'false'}</span></div>
+                {lastTouchStart && <div className="text-blue-400">{lastTouchStart}</div>}
+              </div>
               {/* MouseRelease threshold line at y=100px */}
               {(() => {
                 // Calculate opacity and color based on position.y
@@ -769,6 +866,7 @@ const RiveTester = () => {
                 const threshold = 100;
                 const t = Math.max(0, Math.min(1, y / threshold)); // 0 at origin, 1 at threshold
                 const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
+                // On phone, ignore isHoveredValue for opacity animation
                 const baseOpacity = isTouchDevice ? 1 : (isHoveredValue ? 1 : 0.6);
                 let opacity = baseOpacity * (1 - t); // 1 or 0.6 at origin, 0 at threshold
                 if (inputValues.MouseRelease) opacity = 0;
