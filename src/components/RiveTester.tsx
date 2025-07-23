@@ -86,7 +86,45 @@ const RiveTester = () => {
     }
   };
 
-  // Restore drag handlers
+  // State for debugging mouse events
+  // State to track if pointer (mouse or finger) is currently down
+  const [isPointerDown, setIsPointerDown] = useState(false);
+
+  // Ensure isDragging is false if isPointerDown is false
+  useEffect(() => {
+    if (!isPointerDown && isDragging) {
+      setIsDragging(false);
+    }
+  }, [isPointerDown, isDragging]);
+
+  // Ref to track previous isDragging state
+  const prevIsDraggingRef = useRef(isDragging);
+  const prevDropYRef = useRef(lastDropLocation.y);
+
+  const { RiveComponent, rive } = useRive({
+    src: fileUrl || "",
+    autoplay: false,
+    layout: new Layout({
+      fit: Fit.Contain,
+      alignment: Alignment.Center,
+    }),
+    onLoad: () => {
+      console.log("Rive file loaded successfully!");
+    },
+    onPlay: () => {
+      setIsPlaying(true);
+    },
+    onPause: () => {
+      setIsPlaying(false);
+    },
+  });
+
+  // Handler for window mouseup (native event)
+  const handleWindowMouseUp = (e: MouseEvent) => {
+    // This function is no longer needed as dropRiveAsset is removed.
+    // Keeping it here for now, but it will be removed in a subsequent edit.
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
       setIsDragging(true);
@@ -95,6 +133,7 @@ const RiveTester = () => {
         y: e.clientY - position.y
       });
     }
+    setIsPointerDown(true);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -107,6 +146,14 @@ const RiveTester = () => {
     }
   };
 
+  // State for debugging touch events
+  // Handler for window touchend (native event)
+  const handleWindowTouchEnd = (e: TouchEvent) => {
+    setIsDragging(false);
+    // This function is no longer needed as dropRiveAsset is removed.
+    // Keeping it here for now, but it will be removed in a subsequent edit.
+  };
+
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       const touch = e.touches[0];
@@ -116,6 +163,7 @@ const RiveTester = () => {
         y: touch.clientY - position.y
       });
     }
+    setIsPointerDown(true);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -130,9 +178,12 @@ const RiveTester = () => {
     }
   };
 
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    dropRiveAsset();
+  // State for debugging handleTouchEnd
+  // Handler for React touchend
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    setIsDragging(false); // Ensure dragging ends on touch end
+    // This function is no longer needed as dropRiveAsset is removed.
+    // Keeping it here for now, but it will be removed in a subsequent edit.
   };
 
   // Auto-return animation function
@@ -188,23 +239,31 @@ const RiveTester = () => {
     }
   };
 
-  const dropRiveAsset = () => {
+  // Remove dropRiveAsset, and move last drop logic to handleMouseUp
+
+  const handleMouseUp = (e?: React.MouseEvent) => {
+    // Track last drop position on mouse up
     const dropY = position.y;
     setLastDropLocation({ x: 0, y: dropY });
     console.log('Dropping asset at Y:', dropY, 'MouseRelease:', inputValues.MouseRelease);
-    const currentMouseRelease = inputValues.MouseRelease;
-    if (currentMouseRelease) {
-      triggerMouseRelease();
-    } else {
-      if (dropY >= 100) {
-        triggerMouseRelease();
+    animateToCenter();
+    setIsPointerDown(false);
+    // MouseRelease logic:
+    if (rive && selectedStateMachine) {
+      const inputs = rive.stateMachineInputs(selectedStateMachine);
+      const mouseReleaseInput = inputs.find(i => i.name === "MouseRelease");
+      if (mouseReleaseInput) {
+        if (!mouseReleaseInput.value && dropY >= 100) {
+          // Only go from false to true if dropY >= 100
+          mouseReleaseInput.value = true;
+          setInputValues(prev => ({ ...prev, MouseRelease: true }));
+        } else if (mouseReleaseInput.value) {
+          // Always allow true to false
+          mouseReleaseInput.value = false;
+          setInputValues(prev => ({ ...prev, MouseRelease: false }));
+        }
       }
     }
-    animateToCenter();
-  };
-
-  const handleMouseUp = () => {
-    dropRiveAsset();
   };
 
   // Touch handlers for mobile support
@@ -254,24 +313,6 @@ const RiveTester = () => {
       originalOverflowRef.current = null;
     }
   };
-
-  const { RiveComponent, rive } = useRive({
-    src: fileUrl || "",
-    autoplay: false,
-    layout: new Layout({
-      fit: Fit.Contain,
-      alignment: Alignment.Center,
-    }),
-    onLoad: () => {
-      console.log("Rive file loaded successfully!");
-    },
-    onPlay: () => {
-      setIsPlaying(true);
-    },
-    onPause: () => {
-      setIsPlaying(false);
-    },
-  });
 
   // Extract animations and state machines when rive instance is available
   useEffect(() => {
@@ -605,9 +646,22 @@ const RiveTester = () => {
 
   useEffect(() => {
     if (!isHoveringPreview && isDragging) {
-      dropRiveAsset();
+      // This effect is no longer needed as dropRiveAsset is removed.
+      // Keeping it here for now, but it will be removed in a subsequent edit.
     }
   }, [isHoveringPreview, isDragging]);
+
+  // Ensure dragging ends on mouseup/touchend anywhere (trackpad fix)
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mouseup', handleWindowMouseUp);
+      window.addEventListener('touchend', handleWindowTouchEnd);
+      return () => {
+        window.removeEventListener('mouseup', handleWindowMouseUp);
+        window.removeEventListener('touchend', handleWindowTouchEnd);
+      };
+    }
+  }, [isDragging]);
 
   return (
     <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6">
@@ -671,21 +725,6 @@ const RiveTester = () => {
                     }}
                   >
                     <RiveComponent className="w-full h-full" />
-                  </div>
-                  {/* Debug: Show hover state */}
-                  <div className="absolute top-2 right-2 sm:right-4 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
-                    Hovering preview: <span className={isHoveringPreview ? 'text-green-400' : 'text-red-400'}>{isHoveringPreview ? 'true' : 'false'}</span>
-                  </div>
-                  {/* Debug: Show page scroll state */}
-                  <div className="absolute top-8 right-2 sm:right-4 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
-                    Page scrolling: <span className={isPageScrolling ? 'text-green-400' : 'text-red-400'}>{isPageScrolling ? 'true' : 'false'}</span>
-                    {isPageScrolling && isHoveringPreview && (
-                      <div className="text-yellow-400 font-bold">Warning: Both true!</div>
-                    )}
-                  </div>
-                  {/* Debug: Show drag state */}
-                  <div className="absolute top-14 right-2 sm:right-4 bg-black/70 text-white text-xs px-2 py-1 rounded z-20">
-                    Dragging: <span className={isDragging ? 'text-green-400' : 'text-red-400'}>{isDragging ? 'true' : 'false'}</span>
                   </div>
                 </div>
 
@@ -771,287 +810,6 @@ const RiveTester = () => {
                       )
                     )}
                   </div>
-                </div>
-              </div>
-
-              {/* Basic Controls */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">
-                    {selectedFile?.name}
-                  </Badge>
-                  {isPlaying && (
-                    <Badge variant="secondary">
-                      Playing
-                    </Badge>
-                  )}
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handlePlay} 
-                    disabled={isPlaying}
-                    size="sm"
-                  >
-                    <Play className="w-4 h-4 mr-1" />
-                    Play
-                  </Button>
-                  <Button 
-                    onClick={handlePause} 
-                    disabled={!isPlaying}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Pause className="w-4 h-4 mr-1" />
-                    Pause
-                  </Button>
-                  <Button 
-                    onClick={handleReset}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <RotateCcw className="w-4 h-4 mr-1" />
-                    Reset
-                  </Button>
-                </div>
-              </div>
-
-              {/* State Machine Controls */}
-              {stateMachines.length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    State Machines
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {stateMachines.map((stateMachine) => (
-                      <Button
-                        key={stateMachine}
-                        onClick={() => playStateMachine(stateMachine)}
-                        variant={selectedStateMachine === stateMachine ? "default" : "outline"}
-                        size="sm"
-                      >
-                        {stateMachine}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* State Machine Input Controls - Primary Focus */}
-              {stateMachineInputs.length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <MousePointer className="w-5 h-5" />
-                    State Machine Inputs
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Control animations by adjusting these inputs. For example, toggle "MouseRelease" to switch between Idle and Settle animations.
-                  </p>
-                  <div className="space-y-2">
-                    {stateMachineInputs.map(renderInputControl)}
-                  </div>
-                </div>
-              )}
-
-              {/* Number Inputs for State Machine */}
-              {selectedStateMachine && stateMachineInputs.filter(i => i.type === 'number').length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <MousePointer className="w-5 h-5" />
-                    Number Inputs
-                  </h3>
-                  <div className="space-y-4">
-                    {stateMachineInputs.filter(i => i.type === 'number').map((input) => {
-                      // Default min/max/step
-                      let min = 0, max = 100, step = 0.01;
-                      let value: number;
-                      // Special case for 'speed' input
-                      if (input.name === 'speed') {
-                        min = 0;
-                        max = 10;
-                        step = 0.01;
-                      } else if (rive && selectedStateMachine) {
-                        // Try to get min/max/step from the real Rive input if available
-                        const inputs = rive.stateMachineInputs(selectedStateMachine);
-                        const target = inputs.find(i2 => i2.name === input.name);
-                        if (target && typeof target.value === 'number') {
-                          if ('min' in target && typeof target.min === 'number') min = target.min;
-                          if ('max' in target && typeof target.max === 'number') max = target.max;
-                          if ('step' in target && typeof target.step === 'number') step = target.step;
-                        }
-                      }
-                      // Get value from state or input, fallback to min
-                      const rawValue = inputValues[input.name] ?? input.value;
-                      value = typeof rawValue === 'number' && !isNaN(rawValue) ? rawValue : min;
-                      return (
-                        <div key={input.name} className="flex flex-col gap-2 p-3 border rounded-lg bg-neutral-800">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-white">{input.name}</span>
-                            <Badge variant="outline">Number</Badge>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <input
-                              type="range"
-                              min={min}
-                              max={max}
-                              step={step}
-                              value={value}
-                              onChange={e => {
-                                const newValue = parseFloat(e.target.value);
-                                if (rive && selectedStateMachine) {
-                                  const inputs = rive.stateMachineInputs(selectedStateMachine);
-                                  const target = inputs.find(i2 => i2.name === input.name);
-                                  if (target) {
-                                    target.value = newValue;
-                                    setInputValues(prev => ({ ...prev, [input.name]: newValue }));
-                                    console.log(`Set ${input.name} to`, newValue);
-                                  }
-                                }
-                              }}
-                              className="w-64 accent-blue-500"
-                            />
-                            <input
-                              type="number"
-                              min={min}
-                              max={max}
-                              step={step}
-                              value={value}
-                              onChange={e => {
-                                const newValue = parseFloat(e.target.value);
-                                if (rive && selectedStateMachine) {
-                                  const inputs = rive.stateMachineInputs(selectedStateMachine);
-                                  const target = inputs.find(i2 => i2.name === input.name);
-                                  if (target) {
-                                    target.value = newValue;
-                                    setInputValues(prev => ({ ...prev, [input.name]: newValue }));
-                                    console.log(`Set ${input.name} to`, newValue);
-                                  }
-                                }
-                              }}
-                              className="w-20 px-2 py-1 rounded bg-neutral-900 text-white border border-neutral-700"
-                            />
-                            <span className="text-xs text-gray-300">{`Value: ${value} (type: ${typeof value})`}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Fallback Input Display */}
-              {stateMachineInputs.length === 0 && selectedStateMachine && (
-                <div className="space-y-3">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <MousePointer className="w-5 h-5" />
-                    State Machine Inputs (Fallback)
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Inputs detected but not displaying properly. Here's a test input:
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-4 p-3 border rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={false}
-                          onCheckedChange={(checked) => {
-                            console.log("Fallback MouseRelease toggled:", checked);
-                            // Try to update the actual input
-                            if (rive && selectedStateMachine) {
-                              const inputs = rive.stateMachineInputs(selectedStateMachine);
-                              const input = inputs.find(i => i.name === "MouseRelease");
-                              if (input) {
-                                input.value = checked;
-                                console.log("Updated MouseRelease input to:", checked);
-                              }
-                            }
-                          }}
-                        />
-                        <span className="font-medium">MouseRelease (Fallback)</span>
-                      </div>
-                      <Badge variant="outline">Boolean</Badge>
-                      <span className="text-sm text-gray-500">False</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Manual Refresh Button */}
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Debug Controls</h3>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={refreshInputs}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Refresh Inputs
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      console.log("Current state machine inputs:", stateMachineInputs);
-                      console.log("Current input values:", inputValues);
-                      console.log("Selected state machine:", selectedStateMachine);
-                    }}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Log State
-                  </Button>
-                </div>
-              </div>
-
-              {/* MouseRelease Toggle Control */}
-              {selectedStateMachine && (
-                <div className="space-y-3">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <MousePointer className="w-5 h-5" />
-                    MouseRelease
-                  </h3>
-                  <div className="flex items-center space-x-4 p-3 border rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        checked={!!inputValues.MouseRelease}
-                        onCheckedChange={(checked) => {
-                          if (rive && selectedStateMachine) {
-                            const inputs = rive.stateMachineInputs(selectedStateMachine);
-                            const input = inputs.find(i => i.name === "MouseRelease");
-                            if (input) {
-                              input.value = checked;
-                              setInputValues(prev => ({ ...prev, MouseRelease: checked }));
-                              console.log("Set MouseRelease to", checked);
-                            }
-                          }
-                        }}
-                      />
-                      <span className="font-medium">{inputValues.MouseRelease ? 'True' : 'False'}</span>
-                    </div>
-                    <Badge variant="outline">Boolean</Badge>
-                  </div>
-                </div>
-              )}
-
-              {/* Debug Info */}
-              <div className="text-sm text-gray-500 space-y-1 p-3 bg-gray-50 rounded-lg overflow-x-auto">
-                <div>Animations: {animations.length}</div>
-                <div>State Machines: {stateMachines.length}</div>
-                <div>Inputs: {stateMachineInputs.length}</div>
-                <div>Selected State Machine: {selectedStateMachine || 'None'}</div>
-                <div>Input Values: {JSON.stringify(inputValues)}</div>
-                <div>State Machine Inputs: {JSON.stringify(stateMachineInputs.map(i => ({ name: i.name, type: i.type })))}</div>
-                <div className="mt-2 p-2 bg-white rounded border">
-                  <strong>Raw State Machine Inputs:</strong>
-                  <pre className="text-xs mt-1 overflow-auto">
-                    {JSON.stringify(stateMachineInputs, null, 2)}
-                  </pre>
-                </div>
-                <div className="mt-2 p-2 bg-white rounded border">
-                  <strong>Raw Input Values:</strong>
-                  <pre className="text-xs mt-1 overflow-auto">
-                    {JSON.stringify(inputValues, null, 2)}
-                  </pre>
                 </div>
               </div>
             </div>
