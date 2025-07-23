@@ -119,6 +119,17 @@ const RiveTester = () => {
     },
   });
 
+  // Rive arrow.riv for right-bound animation
+  const { RiveComponent: ArrowRiveComponent } = useRive({
+    src: '/arrow.riv',
+    autoplay: true,
+    stateMachines: 'State Machine 1',
+    layout: new Layout({
+      fit: Fit.Contain,
+      alignment: Alignment.Center,
+    }),
+  });
+
   // Handler for window mouseup (native event)
   const handleWindowMouseUp = (e: MouseEvent) => {
     // This function is no longer needed as dropRiveAsset is removed.
@@ -720,44 +731,63 @@ const RiveTester = () => {
 
       {fileUrl && (
         <div className="w-full max-w-full aspect-square bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800 mx-auto">
-          {/* Container for Rive preview and debug overlays */}
+          {/* Container for Rive preview and overlays */}
           <div className="relative w-full h-full">
-                {/* Canvas Container */}
-                <div
-                  ref={canvasRef}
-                  className="w-full h-full relative cursor-grab active:cursor-grabbing"
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onMouseLeave={e => { handlePreviewMouseLeave(); setIsDragging(false); }}
-                  onMouseEnter={handlePreviewMouseEnter}
+            {/* Canvas Container */}
+            <div
+              ref={canvasRef}
+              className="w-full h-full relative cursor-grab active:cursor-grabbing"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={e => { handlePreviewMouseLeave(); setIsDragging(false); }}
+              onMouseEnter={handlePreviewMouseEnter}
               onWheel={handleWheel}
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                  onTouchCancel={() => { handlePreviewMouseLeave(); setIsDragging(false); }}
-                  onDoubleClick={handleDoubleClick}
-                  style={{
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={() => { handlePreviewMouseLeave(); setIsDragging(false); }}
+              onDoubleClick={handleDoubleClick}
+              style={{
                 touchAction: 'none',
                 cursor: isHoveredValue
                   ? (isDragging ? 'grabbing' : 'grab')
                   : 'default'
-                  }}
-                >
-                  {/* Rive Component with Transform */}
-                  <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{
-                      transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-                      transformOrigin: 'center center',
-                      transition: isDragging ? 'none' : isAnimating ? 'none' : 'transform 0.1s ease-out'
-                    }}
-                  >
-                    <RiveComponent className="w-full h-full" />
-                  </div>
+              }}
+            >
+              {/* Rive Component with Transform */}
+              <div
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                  transformOrigin: 'center center',
+                  transition: isDragging ? 'none' : isAnimating ? 'none' : 'transform 0.1s ease-out'
+                }}
+              >
+                <RiveComponent className="w-full h-full" />
               </div>
-                  </div>
-                </div>
+            </div>
+            {/* Non-interactive arrow.riv animation on right bound */}
+            <div
+              className="absolute z-40"
+              style={{
+                right: 0,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none',
+                width: `${48 * 6.24}px`,
+                height: `${128 * 6.24}px`,
+                maxWidth: '100%',
+                maxHeight: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <ArrowRiveComponent className="w-full h-full" />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Simple slider UI for 'slider number' */}
