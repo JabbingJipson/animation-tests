@@ -771,9 +771,19 @@ const RiveTester = () => {
   }, [canvasRef, position.y, rive, selectedStateMachine]);
 
   // State for scaling the arrow.riv
-  const [arrowScale, setArrowScale] = useState(5);
+  const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
+  const [arrowScale, setArrowScale] = useState(isTouchDevice ? 4.0 : 6.0);
   const arrowMinScale = 5;
   const arrowMaxScale = 7;
+
+  // On phone, force arrowScale to 4.0
+  useEffect(() => {
+    if (isTouchDevice && arrowScale !== 4.0) {
+      setArrowScale(4.0);
+    } else if (!isTouchDevice && arrowScale !== 6.0) {
+      setArrowScale(6.0);
+    }
+  }, [isTouchDevice]);
 
   // Responsive: scale down arrow if window/container is too small
   const previewRef = useRef<HTMLDivElement>(null);
@@ -794,9 +804,6 @@ const RiveTester = () => {
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, [arrowScale]);
-
-  // Utility to detect touch device
-  const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
 
   return (
     <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6">
@@ -850,22 +857,12 @@ const RiveTester = () => {
               >
                 <RiveComponent className="w-full h-full" />
               </div>
-              {/* Debug panel for isDragging and isHoveringPreview */}
-              <div
-                className="absolute bottom-4 left-4 bg-black/70 text-white text-xs px-3 py-2 rounded z-50"
-                style={{ pointerEvents: 'none' }}
-              >
-                <div>isDragging: <span className={isDragging ? 'text-green-400' : 'text-red-400'}>{isDragging ? 'true' : 'false'}</span></div>
-                <div>isHoveringPreview: <span className={isHoveringPreview ? 'text-green-400' : 'text-red-400'}>{isHoveringPreview ? 'true' : 'false'}</span></div>
-                {lastTouchStart && <div className="text-blue-400">{lastTouchStart}</div>}
-              </div>
               {/* MouseRelease threshold line at y=100px */}
               {(() => {
                 // Calculate opacity and color based on position.y
                 const y = position.y;
                 const threshold = 100;
                 const t = Math.max(0, Math.min(1, y / threshold)); // 0 at origin, 1 at threshold
-                const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
                 // On phone, ignore isHoveredValue for opacity animation
                 const baseOpacity = isTouchDevice ? 1 : (isHoveredValue ? 1 : 0.6);
                 let opacity = baseOpacity * (1 - t); // 1 or 0.6 at origin, 0 at threshold
@@ -890,81 +887,29 @@ const RiveTester = () => {
                   />
                 );
               })()}
-            </div>
-            {/* Non-interactive arrow.riv animation on right bound */}
-            <div
-              className="absolute z-40"
-              style={{
-                right: 0,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                pointerEvents: 'none',
-                width: `${48 * arrowScale}px`,
-                height: `${128 * arrowScale}px`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <ArrowRiveComponent className="w-full h-full" />
+              {/* Non-interactive arrow.riv animation on right bound */}
+              <div
+                className="absolute z-40"
+                style={{
+                  right: 0,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none',
+                  width: `${48 * arrowScale}px`,
+                  height: `${128 * arrowScale}px`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ArrowRiveComponent className="w-full h-full" />
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Simple slider UI for 'slider number' */}
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold flex items-center gap-2 text-base sm:text-lg">
-          <MousePointer className="w-5 h-5" />
-          slider number
-        </h3>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-2 sm:p-3 border rounded-lg bg-neutral-800">
-          <input
-            type="range"
-            min={0}
-            max={10}
-            step={0.01}
-            value={sliderNumber}
-            onChange={e => setSliderNumber(parseFloat(e.target.value))}
-            className="w-full sm:w-64 accent-blue-500"
-          />
-          <input
-            type="number"
-            min={0}
-            max={10}
-            step={0.01}
-            value={sliderNumber}
-            onChange={e => setSliderNumber(parseFloat(e.target.value))}
-            className="w-full sm:w-20 px-2 py-1 rounded bg-neutral-900 text-white border border-neutral-700"
-          />
-          <span className="text-xs text-gray-300">{sliderNumber}</span>
-        </div>
-        {/* Arrow scale slider */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-2 sm:p-3 border rounded-lg bg-neutral-800 mt-4">
-          <label className="text-sm font-medium text-white">Arrow Scale</label>
-          <input
-            type="range"
-            min={arrowMinScale}
-            max={arrowMaxScale}
-            step={0.01}
-            value={arrowScale}
-            onChange={e => setArrowScale(parseFloat(e.target.value))}
-            className="w-full sm:w-64 accent-blue-500"
-          />
-          <input
-            type="number"
-            min={arrowMinScale}
-            max={arrowMaxScale}
-            step={0.01}
-            value={arrowScale}
-            onChange={e => setArrowScale(parseFloat(e.target.value))}
-            className="w-full sm:w-20 px-2 py-1 rounded bg-neutral-900 text-white border border-neutral-700"
-          />
-          <span className="text-xs text-gray-300">{arrowScale}</span>
-        </div>
-      </div>
     </div>
   );
 };
 
-export default RiveTester; 
+export default RiveTester;
