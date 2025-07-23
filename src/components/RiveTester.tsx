@@ -137,7 +137,7 @@ const RiveTester = () => {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0 && isHoveredValue) { // Only allow drag if isHovered is true
+    if (e.button === 0 && isHoveredValue) { // Only allow drag if isHovered is true (desktop)
       setIsDragging(true);
       setDragStart({
         x: e.clientX - position.x,
@@ -166,7 +166,7 @@ const RiveTester = () => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1 && isHoveredValue) { // Only allow drag if isHovered is true
+    if (e.touches.length === 1) { // On touch devices, allow drag regardless of isHovered
       const touch = e.touches[0];
       setIsDragging(true);
       setDragStart({
@@ -733,6 +733,9 @@ const RiveTester = () => {
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, [arrowScale]);
+
+  // Utility to detect touch device
+  const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
 
   return (
     <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6">
