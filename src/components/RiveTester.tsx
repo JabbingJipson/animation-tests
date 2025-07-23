@@ -182,8 +182,28 @@ const RiveTester = () => {
   // Handler for React touchend
   const handleTouchEnd = (e: React.TouchEvent) => {
     setIsDragging(false); // Ensure dragging ends on touch end
-    // This function is no longer needed as dropRiveAsset is removed.
-    // Keeping it here for now, but it will be removed in a subsequent edit.
+    // Track last drop position on touch end
+    const dropY = position.y;
+    setLastDropLocation({ x: 0, y: dropY });
+    console.log('Dropping asset at Y:', dropY, 'MouseRelease:', inputValues.MouseRelease);
+    animateToCenter();
+    setIsPointerDown(false);
+    // MouseRelease logic:
+    if (rive && selectedStateMachine) {
+      const inputs = rive.stateMachineInputs(selectedStateMachine);
+      const mouseReleaseInput = inputs.find(i => i.name === "MouseRelease");
+      if (mouseReleaseInput) {
+        if (!mouseReleaseInput.value && dropY >= 100) {
+          // Only go from false to true if dropY >= 100
+          mouseReleaseInput.value = true;
+          setInputValues(prev => ({ ...prev, MouseRelease: true }));
+        } else if (mouseReleaseInput.value) {
+          // Always allow true to false
+          mouseReleaseInput.value = false;
+          setInputValues(prev => ({ ...prev, MouseRelease: false }));
+        }
+      }
+    }
   };
 
   // Auto-return animation function
