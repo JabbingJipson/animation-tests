@@ -768,7 +768,8 @@ const RiveTester = () => {
                 const y = position.y;
                 const threshold = 100;
                 const t = Math.max(0, Math.min(1, y / threshold)); // 0 at origin, 1 at threshold
-                const baseOpacity = isHoveredValue ? 1 : 0.6;
+                const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
+                const baseOpacity = isTouchDevice ? 1 : (isHoveredValue ? 1 : 0.6);
                 let opacity = baseOpacity * (1 - t); // 1 or 0.6 at origin, 0 at threshold
                 if (inputValues.MouseRelease) opacity = 0;
                 // Interpolate color from white to red
