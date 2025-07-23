@@ -709,6 +709,31 @@ const RiveTester = () => {
     }
   }, [rive, selectedStateMachine]);
 
+  // State for scaling the arrow.riv
+  const [arrowScale, setArrowScale] = useState(5);
+  const arrowMinScale = 5;
+  const arrowMaxScale = 7;
+
+  // Responsive: scale down arrow if window/container is too small
+  const previewRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleResize = () => {
+      if (previewRef.current) {
+        const containerWidth = previewRef.current.offsetWidth;
+        // Arrow width at current scale
+        const arrowWidth = 48 * arrowScale;
+        // If arrow would overflow, scale it down to fit, but not below min
+        if (arrowWidth > containerWidth) {
+          const newScale = Math.max(arrowMinScale, Math.floor(containerWidth / 48));
+          setArrowScale(newScale);
+        }
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, [arrowScale]);
+
   return (
     <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6">
       <Card>
@@ -730,7 +755,7 @@ const RiveTester = () => {
       </Card>
 
       {fileUrl && (
-        <div className="w-full max-w-full aspect-square bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800 mx-auto">
+        <div ref={previewRef} className="w-full max-w-full aspect-square bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800 mx-auto">
           {/* Container for Rive preview and overlays */}
           <div className="relative w-full h-full">
             {/* Canvas Container */}
@@ -775,10 +800,8 @@ const RiveTester = () => {
                 top: '50%',
                 transform: 'translateY(-50%)',
                 pointerEvents: 'none',
-                width: `${48 * 6.24}px`,
-                height: `${128 * 6.24}px`,
-                maxWidth: '100%',
-                maxHeight: '100%',
+                width: `${48 * arrowScale}px`,
+                height: `${128 * arrowScale}px`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -816,6 +839,29 @@ const RiveTester = () => {
             className="w-full sm:w-20 px-2 py-1 rounded bg-neutral-900 text-white border border-neutral-700"
           />
           <span className="text-xs text-gray-300">{sliderNumber}</span>
+        </div>
+        {/* Arrow scale slider */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-2 sm:p-3 border rounded-lg bg-neutral-800 mt-4">
+          <label className="text-sm font-medium text-white">Arrow Scale</label>
+          <input
+            type="range"
+            min={arrowMinScale}
+            max={arrowMaxScale}
+            step={0.01}
+            value={arrowScale}
+            onChange={e => setArrowScale(parseFloat(e.target.value))}
+            className="w-full sm:w-64 accent-blue-500"
+          />
+          <input
+            type="number"
+            min={arrowMinScale}
+            max={arrowMaxScale}
+            step={0.01}
+            value={arrowScale}
+            onChange={e => setArrowScale(parseFloat(e.target.value))}
+            className="w-full sm:w-20 px-2 py-1 rounded bg-neutral-900 text-white border border-neutral-700"
+          />
+          <span className="text-xs text-gray-300">{arrowScale}</span>
         </div>
       </div>
     </div>
