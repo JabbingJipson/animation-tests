@@ -722,40 +722,42 @@ const RiveTester = () => {
         <div className="w-full max-w-full aspect-square bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800 mx-auto">
           {/* Container for Rive preview and debug overlays */}
           <div className="relative w-full h-full">
-            {/* Canvas Container */}
-            <div
-              ref={canvasRef}
-              className="w-full h-full relative cursor-grab active:cursor-grabbing"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={e => { handlePreviewMouseLeave(); setIsDragging(false); }}
-              onMouseEnter={handlePreviewMouseEnter}
+                {/* Canvas Container */}
+                <div
+                  ref={canvasRef}
+                  className="w-full h-full relative cursor-grab active:cursor-grabbing"
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={e => { handlePreviewMouseLeave(); setIsDragging(false); }}
+                  onMouseEnter={handlePreviewMouseEnter}
               onWheel={handleWheel}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onTouchCancel={() => { handlePreviewMouseLeave(); setIsDragging(false); }}
-              onDoubleClick={handleDoubleClick}
-              style={{
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onTouchCancel={() => { handlePreviewMouseLeave(); setIsDragging(false); }}
+                  onDoubleClick={handleDoubleClick}
+                  style={{
                 touchAction: 'none',
-                cursor: isDragging ? 'grabbing' : 'grab'
-              }}
-            >
-              {/* Rive Component with Transform */}
-              <div
-                className="absolute inset-0 flex items-center justify-center"
-                style={{
-                  transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-                  transformOrigin: 'center center',
-                  transition: isDragging ? 'none' : isAnimating ? 'none' : 'transform 0.1s ease-out'
-                }}
-              >
-                <RiveComponent className="w-full h-full" />
+                cursor: isHoveredValue
+                  ? (isDragging ? 'grabbing' : 'grab')
+                  : 'default'
+                  }}
+                >
+                  {/* Rive Component with Transform */}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{
+                      transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                      transformOrigin: 'center center',
+                      transition: isDragging ? 'none' : isAnimating ? 'none' : 'transform 0.1s ease-out'
+                    }}
+                  >
+                    <RiveComponent className="w-full h-full" />
+                  </div>
               </div>
-            </div>
-          </div>
-        </div>
+                  </div>
+                </div>
       )}
 
       {/* Simple slider UI for 'slider number' */}
