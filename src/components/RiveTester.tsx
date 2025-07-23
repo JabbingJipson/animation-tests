@@ -33,7 +33,7 @@ const RiveTester = () => {
 
   // Drag and drop state
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  const zoom = 0.7;
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isAnimating, setIsAnimating] = useState(false);
   const [lastDropLocation, setLastDropLocation] = useState({ x: 0, y: 0 });
@@ -78,7 +78,6 @@ const RiveTester = () => {
       setTestToggleValue(false);
       // Reset drag and drop state
       setPosition({ x: 0, y: 0 });
-      setZoom(1); // Ensure initial zoom is 100% (within limits)
       setLastDropLocation({ x: 0, y: 0 });
     } else {
       setFileUrl(null);
@@ -298,35 +297,9 @@ const RiveTester = () => {
   };
 
   // Touch handlers for mobile support
-  const handleWheel = (e: React.WheelEvent) => {
-    if (isHoveringPreviewRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      const zoomFactor = 0.1;
-      const newZoom = e.deltaY > 0 
-        ? Math.max(0.6, zoom - zoomFactor) // Minimum 60%
-        : Math.min(1.4, zoom + zoomFactor); // Maximum 140%
-      setZoom(newZoom);
-    }
-    // If not hovering, allow normal scroll (do nothing)
-  };
-
-  const resetView = () => {
-    setPosition({ x: 0, y: 0 });
-    setZoom(1); // Reset to 100% (within limits)
-    setLastDropLocation({ x: 0, y: 0 });
-  };
-
-  const zoomIn = () => {
-    setZoom(prev => Math.min(1.4, prev + 0.1)); // Maximum 140%
-  };
-
-  const zoomOut = () => {
-    setZoom(prev => Math.max(0.6, prev - 0.1)); // Minimum 60%
-  };
-
   const handleDoubleClick = () => {
-    resetView();
+    setPosition({ x: 0, y: 0 });
+    setLastDropLocation({ x: 0, y: 0 });
   };
 
   const handlePreviewMouseEnter = () => {
@@ -770,11 +743,6 @@ const RiveTester = () => {
               onMouseUp={handleMouseUp}
               onMouseLeave={e => { handlePreviewMouseLeave(); setIsDragging(false); }}
               onMouseEnter={handlePreviewMouseEnter}
-              onWheel={handleWheel}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onTouchCancel={() => { handlePreviewMouseLeave(); setIsDragging(false); }}
               onDoubleClick={handleDoubleClick}
               style={{
                 touchAction: 'none',
@@ -794,6 +762,35 @@ const RiveTester = () => {
               >
                 <RiveComponent className="w-full h-full" />
               </div>
+              {/* MouseRelease threshold line at y=100px */}
+              {(() => {
+                // Calculate opacity and color based on position.y
+                const y = position.y;
+                const threshold = 100;
+                const t = Math.max(0, Math.min(1, y / threshold)); // 0 at origin, 1 at threshold
+                const baseOpacity = isHoveredValue ? 1 : 0.6;
+                let opacity = baseOpacity * (1 - t); // 1 or 0.6 at origin, 0 at threshold
+                if (inputValues.MouseRelease) opacity = 0;
+                // Interpolate color from white to red
+                const r = Math.round(255 * t + 255 * (1 - t)); // always 255
+                const g = Math.round(255 * (1 - t)); // 255 to 0
+                const b = Math.round(255 * (1 - t)); // 255 to 0
+                const color = `rgba(${r},${g},${b},${opacity})`;
+                return (
+                  <div
+                    className="absolute z-30 transition-all duration-300"
+                    style={{
+                      left: '50%',
+                      top: 'calc(50% + 100px)',
+                      width: '200px',
+                      transform: 'translateX(-50%)',
+                      borderTop: `1.5px dashed ${color}`,
+                      opacity,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                );
+              })()}
             </div>
             {/* Non-interactive arrow.riv animation on right bound */}
             <div
