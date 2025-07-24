@@ -1,22 +1,35 @@
-import * as React from "react"
-
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { motion } from "framer-motion";
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, style, ...props }, ref) => {
+    const [isFocused, setIsFocused] = React.useState(false);
     return (
-      <input
-        type={type}
-        className={cn(
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          className
-        )}
-        ref={ref}
-        {...props}
-      />
-    )
+      <motion.div
+        whileHover={{ backgroundColor: "rgba(186,186,186,0.05)" }}
+        className={"w-full h-10 rounded-md " + (className || "")}
+      >
+        <input
+          ref={ref}
+          {...props}
+          onFocus={e => {
+            setIsFocused(true);
+            props.onFocus && props.onFocus(e);
+          }}
+          onBlur={e => {
+            setIsFocused(false);
+            props.onBlur && props.onBlur(e);
+          }}
+          className={
+            "w-full h-full px-3 rounded-md bg-white/10 border text-white placeholder:text-zinc-400 outline-none transition " +
+            (isFocused ? "border-blue-400" : "border-zinc-400/20")
+          }
+          style={{ fontSize: 14, ...style }}
+        />
+      </motion.div>
+    );
   }
-)
-Input.displayName = "Input"
+);
+Input.displayName = "Input";
 
-export { Input }
+export { Input };

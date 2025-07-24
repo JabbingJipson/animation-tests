@@ -26,12 +26,12 @@ const ProjectCard = ({ id, title, description, isActive = false, onClick }: Proj
           `}>
             {id}
           </div>
-          <h3 className="font-medium text-lg uppercase tracking-wider">
+          <h3 className="text-title">
             {title}
           </h3>
         </div>
         
-        <p className="text-muted-foreground text-sm leading-relaxed">
+        <p className="text-caption">
           {description}
         </p>
         

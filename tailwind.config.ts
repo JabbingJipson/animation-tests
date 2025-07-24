@@ -19,6 +19,14 @@ export default {
 		},
 		extend: {
 			colors: {
+				// Brand palette
+				brand: {
+					50: '#EEEDE9',
+					100: '#788183',
+					200: '#688695',
+					300: '#6F7482',
+					400: '#2B2F3C',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

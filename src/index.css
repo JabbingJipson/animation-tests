@@ -8,107 +8,194 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 215 25% 7%;      /* #11181C */
+    --foreground: 0 0% 100%;       /* #FFFFFF */
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 215 19% 12%;           /* #161D23 */
+    --card-foreground: 0 0% 100%;  /* #FFFFFF */
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 215 19% 12%;        /* #161D23 */
+    --popover-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --primary: 46 100% 77%;
-    --primary-foreground: 240 10% 3.9%;
+    --primary: 0 0% 100%;          /* #FFFFFF */
+    --primary-foreground: 215 25% 7%; /* #11181C */
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 215 25% 7%;       /* #11181C */
+    --secondary-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 215 19% 12%;          /* #161D23 */
+    --muted-foreground: 215 25% 7%; /* #11181C */
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 215 100% 60%;        /* #3B82F6 (for glows only) */
+    --accent-foreground: 0 0% 100%; /* #FFFFFF */
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 46 100% 77%;
+    --border: 220 10% 20%;         /* #23272F */
+    --input: 220 10% 20%;          /* #23272F */
+    --ring: 215 100% 60%;          /* #3B82F6 */
 
     --radius: 0.75rem;
 
-    /* Custom design tokens */
-    --vector-primary: 240 6% 10%;
-    --vector-secondary: 240 4% 16%;
-    --glow-primary: 46 100% 77%;
-    --glow-secondary: 197 100% 63%;
-    --gradient-primary: linear-gradient(135deg, hsl(46 100% 77% / 0.1), hsl(197 100% 63% / 0.1));
-    --shadow-glow: 0 0 50px hsl(46 100% 77% / 0.15);
+    --vector-primary: 215 100% 60%;
+    --vector-secondary: 215 19% 12%;
+    --glow-primary: 215 100% 60%;
+    --glow-secondary: 215 19% 12%;
+    --gradient-primary: linear-gradient(135deg, hsl(215 100% 60% / 0.1), hsl(215 19% 12% / 0.1));
+    --shadow-glow: 0 0 50px hsl(215 100% 60% / 0.15);
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 215 19% 12%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 215 25% 7%;
+    --sidebar-accent: 215 100% 60%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 10% 20%;
+    --sidebar-ring: 215 100% 60%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 215 25% 7%;      /* #11181C */
+    --foreground: 0 0% 100%;       /* #FFFFFF */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 215 19% 12%;           /* #161D23 */
+    --card-foreground: 0 0% 100%;  /* #FFFFFF */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 215 19% 12%;        /* #161D23 */
+    --popover-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0 0% 100%;          /* #FFFFFF */
+    --primary-foreground: 215 25% 7%; /* #11181C */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 25% 7%;       /* #11181C */
+    --secondary-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 19% 12%;          /* #161D23 */
+    --muted-foreground: 215 25% 7%; /* #11181C */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 215 100% 60%;        /* #3B82F6 (for glows only) */
+    --accent-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 10% 20%;         /* #23272F */
+    --input: 220 10% 20%;          /* #23272F */
+    --ring: 215 100% 60%;          /* #3B82F6 */
+
+    --vector-primary: 215 100% 60%;
+    --vector-secondary: 215 19% 12%;
+    --glow-primary: 215 100% 60%;
+    --glow-secondary: 215 19% 12%;
+    --gradient-primary: linear-gradient(135deg, hsl(215 100% 60% / 0.1), hsl(215 19% 12% / 0.1));
+    --shadow-glow: 0 0 50px hsl(215 100% 60% / 0.15);
+    --sidebar-background: 215 19% 12%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 215 25% 7%;
+    --sidebar-accent: 215 100% 60%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 10% 20%;
+    --sidebar-ring: 215 100% 60%;
   }
 }
 
+@font-face {
+  font-family: 'Neue Haas Grotesk';
+  src: url('./neue-haas-grotesk/NeueHaasDisplayThin.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Neue Haas Grotesk';
+  src: url('./neue-haas-grotesk/NeueHaasDisplayThinItalic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Neue Haas Grotesk';
+  src: url('./neue-haas-grotesk/NeueHaasDisplayLight.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Neue Haas Grotesk';
+  src: url('./neue-haas-grotesk/NeueHaasDisplayLightItalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Neue Haas Grotesk';
+  src: url('./neue-haas-grotesk/NeueHaasDisplayMedium.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Neue Haas Grotesk';
+  src: url('./neue-haas-grotesk/NeueHaasDisplayMediumItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Neue Haas Grotesk';
+  src: url('./neue-haas-grotesk/NeueHaasDisplayBold.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Neue Haas Grotesk';
+  src: url('./neue-haas-grotesk/NeueHaasDisplayBoldItalic.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 @layer base {
+  html, body {
+    font-family: 'Neue Haas Grotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    color: theme('colors.brand.50');
+  }
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background;
+  }
+}
+
+@layer components {
+  .text-primary-style {
+    @apply text-brand-50;
+  }
+  .text-secondary-style {
+    @apply text-brand-300;
+  }
+  .text-display {
+    @apply text-3xl font-light text-primary-style;
+  }
+  .text-title {
+    @apply text-lg font-semibold text-primary-style;
+  }
+  .text-subtitle {
+    @apply text-base font-medium text-primary-style;
+  }
+  .text-body {
+    @apply text-sm font-normal text-primary-style;
+  }
+  .text-caption {
+    @apply text-xs font-normal text-secondary-style;
+  }
+  .text-code {
+    @apply text-[10px] font-mono text-secondary-style bg-card/60 px-2 py-1 rounded;
   }
 }

@@ -4,6 +4,7 @@ import NavigationSidebar from "@/components/NavigationSidebar";
 import RiveTester from "@/components/RiveTester";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
+import FontAndColorSamples from "./FontAndColorSamples";
 
 const projects = [
   {
@@ -25,6 +26,11 @@ const projects = [
     id: "04",
     title: "UI Transitions",
     description: "Micro-interactions and state transitions for modern user interface components."
+  },
+  {
+    id: "font-color-samples",
+    title: "Font & Color Samples",
+    description: "View the style guide for typography and color usage."
   }
 ];
 
@@ -38,12 +44,14 @@ const Index = () => {
     switch (currentProject.id) {
       case "rive-tester":
         return <RiveTester />;
+      case "font-color-samples":
+        return <FontAndColorSamples />;
       default:
         return (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">{currentProject.title}</h2>
-              <p className="text-muted-foreground">{currentProject.description}</p>
+              <h2 className="text-display mb-2">{currentProject.title}</h2>
+              <p className="text-caption">{currentProject.description}</p>
             </div>
           </div>
         );
@@ -51,10 +59,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <BackgroundVectors />
       
-      <div className="relative z-10 flex">
+      <div className="relative z-10 flex flex-1 overflow-auto">
         {sidebarOpen && (
           <NavigationSidebar 
             projects={projects}
@@ -77,6 +85,34 @@ const Index = () => {
           {renderProjectContent()}
         </div>
       </div>
+      {/* Footer with Return to Top */}
+      <footer className="w-full py-6 flex justify-center items-center bg-card border-t border-border mt-auto">
+        <Button
+          onClick={() => {
+            // Custom smooth scroll to top with 200ms duration
+            const start = window.scrollY;
+            const duration = 200;
+            const startTime = performance.now();
+            function easeInOut(t) {
+              return t < 0.5
+                ? 2 * t * t
+                : -1 + (4 - 2 * t) * t;
+            }
+            function animateScroll(now) {
+              const elapsed = now - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const eased = easeInOut(progress);
+              window.scrollTo(0, start * (1 - eased));
+              if (progress < 1) {
+                requestAnimationFrame(animateScroll);
+              }
+            }
+            requestAnimationFrame(animateScroll);
+          }}
+        >
+          Return to Top
+        </Button>
+      </footer>
     </div>
   );
 };

@@ -52,7 +52,7 @@ const FileUpload = ({ onFileSelect, selectedFile, accept = ".riv" }: FileUploadP
           <Upload className="w-5 h-5" />
           Upload Rive File
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-brand-300">
           Drag and drop a .riv file or click to browse
         </CardDescription>
       </CardHeader>

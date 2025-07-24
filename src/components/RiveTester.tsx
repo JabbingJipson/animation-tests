@@ -806,14 +806,14 @@ const RiveTester = () => {
   }, [arrowScale]);
 
   return (
-    <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6">
-      <Card>
+    <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6 bg-background">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="w-5 h-5" />
             Rive Animation Tester
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-brand-300">
             Upload a Rive file to preview and control animations through state machine inputs
           </CardDescription>
         </CardHeader>
@@ -826,7 +826,7 @@ const RiveTester = () => {
       </Card>
 
       {fileUrl && (
-        <div ref={previewRef} className="w-full max-w-full aspect-square bg-neutral-900 rounded-lg overflow-hidden border-2 border-neutral-800 mx-auto">
+        <div ref={previewRef} className="w-full max-w-full aspect-square bg-card rounded-lg overflow-hidden border-2 border-border mx-auto mb-64">
           {/* Container for Rive preview and overlays */}
           <div className="relative w-full h-full">
             {/* Canvas Container */}

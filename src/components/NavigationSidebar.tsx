@@ -37,15 +37,15 @@ const NavigationSidebar = ({ projects, activeProject, onProjectSelect }: Navigat
           >
             <div className="p-4 flex items-center gap-4">
               <div className={`
-                text-sm font-mono w-8 text-center
-                ${activeProject === project.id ? 'text-primary' : 'text-muted-foreground'}
+                text-caption font-mono w-8 text-center
+                ${activeProject === project.id ? 'text-title' : ''}
               `}>
                 {index + 1}.
               </div>
               <div className="flex-1">
                 <div className={`
-                  text-sm uppercase tracking-wider font-medium
-                  ${activeProject === project.id ? 'text-primary' : 'text-foreground'}
+                  text-title
+                  ${activeProject === project.id ? 'text-title' : ''}
                 `}>
                   {project.title}
                 </div>
@@ -59,13 +59,26 @@ const NavigationSidebar = ({ projects, activeProject, onProjectSelect }: Navigat
           </button>
         ))}
         
+        {/* Create Account page link */}
+        <a
+          href="/create-account"
+          className="block w-full text-left group relative overflow-hidden rounded-lg transition-all duration-300 hover:bg-primary/10 mt-6"
+        >
+          <div className="p-4 flex items-center gap-4">
+            <div className="text-caption font-mono w-8 text-center">*</div>
+            <div className="flex-1">
+              <div className="text-title">Create Account</div>
+            </div>
+          </div>
+        </a>
+
         {/* Add new project button */}
         <Button 
           variant="ghost" 
           className="w-full justify-start text-muted-foreground hover:text-primary mt-8"
         >
-          <div className="text-sm font-mono w-8 text-center">+</div>
-          <div className="text-sm uppercase tracking-wider">New Project</div>
+          <div className="text-caption font-mono w-8 text-center">+</div>
+          <div className="text-caption">New Project</div>
         </Button>
       </div>
 
