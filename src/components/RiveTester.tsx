@@ -840,7 +840,6 @@ const RiveTester = () => {
               onMouseEnter={handlePreviewMouseEnter}
               onDoubleClick={handleDoubleClick}
               style={{
-                touchAction: 'none',
                 cursor: isHoveredValue
                   ? (isDragging ? 'grabbing' : 'grab')
                   : 'default'
