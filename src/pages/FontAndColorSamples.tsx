@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import BackgroundVectors from "@/components/BackgroundVectors";
-import NavigationSidebar from "@/components/NavigationSidebar";
+import NavigationOverlay from "@/components/NavigationOverlay";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Menu } from "lucide-react";
+import AnimatedMenuButton from "@/components/AnimatedMenuButton";
 import { Button } from "@/components/ui/button";
 
 const projects = [
@@ -12,21 +12,6 @@ const projects = [
     description: "Test your Rive animations and state machine interactions with various triggers and controls."
   },
   {
-    id: "02", 
-    title: "Morphing Shapes",
-    description: "Geometric transformation animation featuring smooth morphing between different polygon shapes."
-  },
-  {
-    id: "03",
-    title: "Character Walk",
-    description: "Skeletal animation system for character movement with procedural walk cycle generation."
-  },
-  {
-    id: "04",
-    title: "UI Transitions",
-    description: "Micro-interactions and state transitions for modern user interface components."
-  },
-  {
     id: "font-color-samples",
     title: "Font & Color Samples",
     description: "View the style guide for typography and color usage."
@@ -34,7 +19,7 @@ const projects = [
 ];
 
 export default function FontAndColorSamples() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [overlayOpen, setOverlayOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,24 +39,13 @@ export default function FontAndColorSamples() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <BackgroundVectors />
       <div className="relative z-10 flex flex-1 overflow-auto">
-        {sidebarOpen && (
-          <NavigationSidebar 
-            projects={projects}
-            activeProject={activeProject}
-            onProjectSelect={handleProjectSelect}
-          />
-        )}
-        <div className={sidebarOpen ? "ml-80 flex-1 flex items-center justify-center" : "flex-1 flex items-center justify-center"}>
+        <div className="flex-1 flex items-center justify-center">
           {/* Toggle Sidebar Button */}
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <AnimatedMenuButton
+            isOpen={overlayOpen}
+            onToggle={() => setOverlayOpen((open) => !open)}
             className="absolute top-4 left-4 z-20"
-            onClick={() => setSidebarOpen((open) => !open)}
-            aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
+          />
           <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6">
             {/* Color Palette Demo */}
             <div className="mb-8">
@@ -115,6 +89,15 @@ export default function FontAndColorSamples() {
           </div>
         </div>
       </div>
+
+      {/* Navigation Overlay */}
+      <NavigationOverlay
+        isOpen={overlayOpen}
+        onClose={() => setOverlayOpen(false)}
+        projects={projects}
+        activeProject={activeProject}
+        onProjectSelect={handleProjectSelect}
+      />
     </div>
   );
 } 

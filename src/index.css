@@ -129,7 +129,7 @@ All colors MUST be HSL.
   font-weight: 500;
   font-style: italic;
   font-display: swap;
-}
+  }
 @font-face {
   font-family: 'Neue Haas Grotesk';
   src: url('./neue-haas-grotesk/NeueHaasDisplayMedium.ttf') format('truetype');

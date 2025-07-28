@@ -9,9 +9,9 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         whileHover={{ backgroundColor: "rgba(186,186,186,0.05)" }}
         className={"w-full h-10 rounded-md " + (className || "")}
       >
-        <input
-          ref={ref}
-          {...props}
+      <input
+        ref={ref}
+        {...props}
           onFocus={e => {
             setIsFocused(true);
             props.onFocus && props.onFocus(e);
@@ -25,7 +25,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
             (isFocused ? "border-blue-400" : "border-zinc-400/20")
           }
           style={{ fontSize: 14, ...style }}
-        />
+      />
       </motion.div>
     );
   }

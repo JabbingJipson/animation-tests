@@ -1,10 +1,23 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import BackgroundVectors from "@/components/BackgroundVectors";
-import NavigationSidebar from "@/components/NavigationSidebar";
+import NavigationOverlay from "@/components/NavigationOverlay";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import AnimatedMenuButton from "@/components/AnimatedMenuButton";
 import { useNavigate, useLocation } from "react-router-dom";
+
+const projects = [
+  {
+    id: "rive-tester",
+    title: "Rive Asset Tester",
+    description: "Test your Rive animations and state machine interactions with various triggers and controls."
+  },
+  {
+    id: "font-color-samples",
+    title: "Font & Color Samples",
+    description: "View the style guide for typography and color usage."
+  }
+];
 
 const initialForm = {
   firstName: "",
@@ -42,39 +55,11 @@ function AnimatedInput({
   );
 }
 
-const projects = [
-  {
-    id: "rive-tester",
-    title: "Rive Asset Tester",
-    description: "Test your Rive animations and state machine interactions with various triggers and controls."
-  },
-  {
-    id: "02", 
-    title: "Morphing Shapes",
-    description: "Geometric transformation animation featuring smooth morphing between different polygon shapes."
-  },
-  {
-    id: "03",
-    title: "Character Walk",
-    description: "Skeletal animation system for character movement with procedural walk cycle generation."
-  },
-  {
-    id: "04",
-    title: "UI Transitions",
-    description: "Micro-interactions and state transitions for modern user interface components."
-  },
-  {
-    id: "font-color-samples",
-    title: "Font & Color Samples",
-    description: "View the style guide for typography and color usage."
-  }
-];
-
 export default function CreateAccount() {
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [overlayOpen, setOverlayOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -82,7 +67,6 @@ export default function CreateAccount() {
   const activeProject = React.useMemo(() => {
     if (location.pathname === "/create-account") return "create-account";
     if (location.pathname === "/") return projects[0].id;
-    // You can add more path-to-id logic if needed
     return null;
   }, [location.pathname]);
 
@@ -90,7 +74,6 @@ export default function CreateAccount() {
     if (projectId === "rive-tester") navigate("/");
     else if (projectId === "create-account") navigate("/create-account");
     else if (projectId === "font-color-samples") navigate("/font-color-samples");
-    // Add more routes as needed
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,24 +95,13 @@ export default function CreateAccount() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <BackgroundVectors />
       <div className="relative z-10 flex flex-1 overflow-auto">
-        {sidebarOpen && (
-          <NavigationSidebar 
-            projects={projects}
-            activeProject={activeProject}
-            onProjectSelect={handleProjectSelect}
-          />
-        )}
-        <div className={sidebarOpen ? "ml-80 flex-1 flex items-center justify-center" : "flex-1 flex items-center justify-center"}>
+        <div className="flex-1 flex items-center justify-center">
           {/* Toggle Sidebar Button */}
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <AnimatedMenuButton
+            isOpen={overlayOpen}
+            onToggle={() => setOverlayOpen((open) => !open)}
             className="absolute top-4 left-4 z-20"
-            onClick={() => setSidebarOpen((open) => !open)}
-            aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
+          />
           <form
             onSubmit={handleSubmit}
             className="w-[320px] p-6 rounded-2xl shadow-lg bg-card backdrop-blur-md border border-border flex flex-col gap-6 relative"
@@ -195,6 +167,15 @@ export default function CreateAccount() {
           </form>
         </div>
       </div>
+
+      {/* Navigation Overlay */}
+      <NavigationOverlay
+        isOpen={overlayOpen}
+        onClose={() => setOverlayOpen(false)}
+        projects={projects}
+        activeProject={activeProject}
+        onProjectSelect={handleProjectSelect}
+      />
     </div>
   );
 } 
