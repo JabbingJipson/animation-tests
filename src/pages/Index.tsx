@@ -5,7 +5,6 @@ import RiveTester from "@/components/RiveTester";
 import { Button } from "@/components/ui/button";
 import AnimatedMenuButton from "@/components/AnimatedMenuButton";
 import FontAndColorSamples from "./FontAndColorSamples";
-import { useRive, Layout, Fit, Alignment } from "@rive-app/react-canvas";
 import { motion } from "framer-motion";
 
 const projects = [
@@ -27,57 +26,10 @@ const Index = () => {
   
   const currentProject = projects.find(p => p.id === activeProject) || projects[0];
 
-  // Pure Rive test for MenuButton
-  const { RiveComponent: MenuButtonRive, rive: menuRive } = useRive({
-    src: "/MenuButton.riv",
-    autoplay: true,
-    stateMachines: "State Machine 1",
-    layout: new Layout({
-      fit: Fit.Contain,
-      alignment: Alignment.Center,
-    }),
-    onLoad: () => {
-      console.log("MenuButton.riv loaded successfully in test!");
-    },
-  });
-
-  const testMenuButton = () => {
-    if (menuRive) {
-      const inputs = menuRive.stateMachineInputs("State Machine 1");
-      console.log("Available inputs:", inputs);
-      const input = inputs.find(input => input.name === "isClicked");
-      if (input) {
-        input.value = !input.value;
-        console.log("Toggled isClicked to:", input.value);
-      } else {
-        console.log("isClicked input not found!");
-      }
-    }
-  };
-
   const renderProjectContent = () => {
     switch (currentProject.id) {
       case "rive-tester":
-        return (
-          <div>
-            <RiveTester />
-            {/* Pure Rive Test Section */}
-            <div className="mt-8 p-6 bg-card rounded-lg border border-border">
-              <h3 className="text-title mb-4">MenuButton.riv Pure Test</h3>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 border border-border rounded-lg p-2">
-                  <MenuButtonRive className="w-full h-full" />
-                </div>
-                <Button onClick={testMenuButton}>
-                  Toggle Animation
-                </Button>
-              </div>
-              <p className="text-caption mt-2">
-                Click the button to test the MenuButton.riv animation directly
-              </p>
-            </div>
-          </div>
-        );
+        return <RiveTester />;
       case "font-color-samples":
         return <FontAndColorSamples />;
       default:

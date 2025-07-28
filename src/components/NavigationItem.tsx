@@ -36,6 +36,10 @@ const NavigationItem = ({ title, isActive = false, onClick, className = "" }: Na
         mask: "var(--mask-gradient)",
         WebkitMask: "var(--webkit-mask-gradient)",
         width: window.innerWidth > 768 ? "280px" : "100%", // Fixed width on desktop, flexible on mobile
+        userSelect: "none", // Prevent text selection
+        WebkitUserSelect: "none", // For Safari
+        MozUserSelect: "none", // For Firefox
+        msUserSelect: "none", // For IE/Edge
       }}
     >
       <div className="absolute inset-0 flex items-center justify-center px-3">
