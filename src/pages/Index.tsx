@@ -31,7 +31,13 @@ const Index = () => {
       case "rive-tester":
         return <RiveTester />;
       case "font-color-samples":
-        return <FontAndColorSamples />;
+        return (
+          <FontAndColorSamples 
+            showNavigation={false} 
+            overlayOpen={overlayOpen}
+            onOverlayToggle={() => setOverlayOpen((open) => !open)}
+          />
+        );
       default:
         return (
           <div className="flex items-center justify-center h-full">

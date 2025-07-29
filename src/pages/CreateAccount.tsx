@@ -94,14 +94,25 @@ export default function CreateAccount() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <BackgroundVectors />
-      <div className="relative z-10 flex flex-1 overflow-auto">
+      
+      {/* Toggle Sidebar Button */}
+      <AnimatedMenuButton
+        isOpen={overlayOpen}
+        onToggle={() => setOverlayOpen((open) => !open)}
+        className="fixed top-4 left-4 z-50"
+      />
+      
+      <motion.div 
+        className="relative z-10 flex flex-1 overflow-auto"
+        animate={{
+          x: overlayOpen ? (window.innerWidth <= 768 ? 220 : 0) : 0
+        }}
+        transition={{
+          duration: 0.3,
+          ease: "easeInOut"
+        }}
+      >
         <div className="flex-1 flex items-center justify-center">
-          {/* Toggle Sidebar Button */}
-          <AnimatedMenuButton
-            isOpen={overlayOpen}
-            onToggle={() => setOverlayOpen((open) => !open)}
-            className="absolute top-4 left-4 z-20"
-          />
           <form
             onSubmit={handleSubmit}
             className="w-[320px] p-6 rounded-2xl shadow-lg bg-card backdrop-blur-md border border-border flex flex-col gap-6 relative"
@@ -166,7 +177,7 @@ export default function CreateAccount() {
             )}
           </form>
         </div>
-      </div>
+      </motion.div>
 
       {/* Navigation Overlay */}
       <NavigationOverlay

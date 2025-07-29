@@ -4,6 +4,7 @@ import NavigationOverlay from "@/components/NavigationOverlay";
 import { useNavigate, useLocation } from "react-router-dom";
 import AnimatedMenuButton from "@/components/AnimatedMenuButton";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 const projects = [
   {
@@ -18,10 +19,24 @@ const projects = [
   }
 ];
 
-export default function FontAndColorSamples() {
-  const [overlayOpen, setOverlayOpen] = useState(false);
+interface FontAndColorSamplesProps {
+  showNavigation?: boolean;
+  overlayOpen?: boolean;
+  onOverlayToggle?: () => void;
+}
+
+export default function FontAndColorSamples({ 
+  showNavigation = true, 
+  overlayOpen: externalOverlayOpen,
+  onOverlayToggle 
+}: FontAndColorSamplesProps) {
+  const [internalOverlayOpen, setInternalOverlayOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Use external overlay state if provided, otherwise use internal state
+  const overlayOpen = externalOverlayOpen !== undefined ? externalOverlayOpen : internalOverlayOpen;
+  const setOverlayOpen = onOverlayToggle || (() => setInternalOverlayOpen(open => !open));
 
   const activeProject = React.useMemo(() => {
     if (location.pathname === "/font-color-samples") return "font-color-samples";
@@ -38,14 +53,27 @@ export default function FontAndColorSamples() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <BackgroundVectors />
-      <div className="relative z-10 flex flex-1 overflow-auto">
+      
+      {/* Toggle Sidebar Button - Only show if showNavigation is true */}
+      {showNavigation && (
+        <AnimatedMenuButton
+          isOpen={overlayOpen}
+          onToggle={setOverlayOpen}
+          className="fixed top-4 left-4 z-50"
+        />
+      )}
+      
+      <motion.div 
+        className="relative z-10 flex flex-1 overflow-auto"
+        animate={{
+          x: overlayOpen ? (window.innerWidth <= 768 ? 220 : 0) : 0
+        }}
+        transition={{
+          duration: 0.3,
+          ease: "easeInOut"
+        }}
+      >
         <div className="flex-1 flex items-center justify-center">
-          {/* Toggle Sidebar Button */}
-          <AnimatedMenuButton
-            isOpen={overlayOpen}
-            onToggle={() => setOverlayOpen((open) => !open)}
-            className="absolute top-4 left-4 z-20"
-          />
           <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6">
             {/* Color Palette Demo */}
             <div className="mb-8">
@@ -88,16 +116,18 @@ export default function FontAndColorSamples() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Navigation Overlay */}
-      <NavigationOverlay
-        isOpen={overlayOpen}
-        onClose={() => setOverlayOpen(false)}
-        projects={projects}
-        activeProject={activeProject}
-        onProjectSelect={handleProjectSelect}
-      />
+      {/* Navigation Overlay - Only render if showNavigation is true */}
+      {showNavigation && (
+        <NavigationOverlay
+          isOpen={overlayOpen}
+          onClose={() => setOverlayOpen()}
+          projects={projects}
+          activeProject={activeProject}
+          onProjectSelect={handleProjectSelect}
+        />
+      )}
     </div>
   );
 } 
