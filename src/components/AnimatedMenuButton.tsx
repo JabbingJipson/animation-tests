@@ -30,7 +30,16 @@ const AnimatedMenuButton = ({ isOpen, onToggle, className = "" }: AnimatedMenuBu
       const isClickedInput = inputs.find(input => input.name === "isClicked");
       if (isClickedInput) {
         console.log(`Setting isClicked to ${isOpen}`);
+        
+        // Clear any existing timeouts
+        const timeoutId = setTimeout(() => {
+          isClickedInput.value = isOpen;
+        }, 0);
+        
+        // Also set immediately
         isClickedInput.value = isOpen;
+        
+        return () => clearTimeout(timeoutId);
       } else {
         console.log("isClicked input not found!");
       }
@@ -41,6 +50,17 @@ const AnimatedMenuButton = ({ isOpen, onToggle, className = "" }: AnimatedMenuBu
 
   const handleClick = () => {
     console.log("Menu button clicked, current isOpen:", isOpen);
+    
+    // Immediately update the Rive input if available
+    if (rive) {
+      const inputs = rive.stateMachineInputs("State Machine 1");
+      const isClickedInput = inputs.find(input => input.name === "isClicked");
+      if (isClickedInput) {
+        // Set to the opposite of current state immediately
+        isClickedInput.value = !isOpen;
+      }
+    }
+    
     // Call the parent's onToggle function to update the isOpen state
     onToggle();
   };
@@ -48,10 +68,10 @@ const AnimatedMenuButton = ({ isOpen, onToggle, className = "" }: AnimatedMenuBu
   return (
     <div
       onClick={handleClick}
-      className={`w-[70px] h-[70px] flex items-center justify-center rounded-lg transition-all duration-300 cursor-pointer ${className}`}
+      className={`w-[120px] h-[120px] flex items-center justify-center rounded-lg transition-all duration-300 cursor-pointer ${className}`}
       aria-label={isOpen ? "Close menu" : "Open menu"}
     >
-      <div className="w-12 h-12 hover:brightness-150 transition-all duration-300">
+      <div className="w-20 h-20 hover:brightness-150 transition-all duration-300">
         <RiveComponent className="w-full h-full" />
       </div>
     </div>

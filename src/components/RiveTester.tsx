@@ -806,7 +806,7 @@ const RiveTester = () => {
   }, [arrowScale]);
 
   return (
-    <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6 bg-background">
+    <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-6 space-y-6 bg-background mt-20">
       <Card className="bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

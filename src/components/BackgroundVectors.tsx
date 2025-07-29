@@ -1,11 +1,14 @@
-const BackgroundVectors = () => {
+import React from 'react';
+
+const BackgroundVectors = React.memo(() => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       {/* Geometric lines and shapes */}
       <svg 
         className="absolute inset-0 w-full h-full opacity-30" 
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid slice"
+        style={{ transform: 'translateZ(0)' }}
       >
         {/* Main diagonal lines */}
         <line 
@@ -100,6 +103,8 @@ const BackgroundVectors = () => {
       </svg>
     </div>
   );
-};
+});
+
+BackgroundVectors.displayName = 'BackgroundVectors';
 
 export default BackgroundVectors;

@@ -107,8 +107,8 @@ export default {
 				},
 				'drift': {
 					'0%': { transform: 'translateX(0) translateY(0)' },
-					'33%': { transform: 'translateX(10px) translateY(-10px)' },
-					'66%': { transform: 'translateX(-5px) translateY(10px)' },
+					'33%': { transform: 'translateX(2px) translateY(-2px)' },
+					'66%': { transform: 'translateX(-1px) translateY(2px)' },
 					'100%': { transform: 'translateX(0) translateY(0)' }
 				},
 				'glow-pulse': {

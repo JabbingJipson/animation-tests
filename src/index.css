@@ -181,21 +181,21 @@ All colors MUST be HSL.
     @apply text-brand-300;
   }
   .text-display {
-    @apply text-3xl font-light text-primary-style;
+    @apply text-3xl font-light text-primary-style tracking-tight;
   }
   .text-title {
-    @apply text-lg font-semibold text-primary-style;
+    @apply text-lg font-semibold text-primary-style tracking-normal;
   }
   .text-subtitle {
-    @apply text-base font-medium text-primary-style;
+    @apply text-base font-medium text-primary-style tracking-normal;
   }
   .text-body {
-    @apply text-sm font-normal text-primary-style;
+    @apply text-sm font-normal text-primary-style tracking-wide;
   }
   .text-caption {
-    @apply text-xs font-normal text-secondary-style;
+    @apply text-xs font-normal text-secondary-style tracking-wider;
   }
   .text-code {
-    @apply text-[10px] font-mono text-secondary-style bg-card/60 px-2 py-1 rounded;
+    @apply text-[10px] font-mono text-secondary-style bg-card/60 px-2 py-1 rounded tracking-widest;
   }
 }
